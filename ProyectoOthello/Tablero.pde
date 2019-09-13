@@ -32,6 +32,20 @@ class Tablero {
    * Contador de la cantidad de turnos en el tablero
    */
   int numeroDeTurno;
+  
+  
+  //x es el turno actual, y el anterior
+  PVector getTurno(){
+    PVector enTurno = new PVector();
+    if(this.turno){
+      enTurno.x = 1;
+      enTurno.y = 2;
+    } else {
+      enTurno.x = 2;
+      enTurno.y = 1;
+    }
+    return enTurno;
+  }
 
   /**
    * Constructor base de un tablero. 
@@ -87,6 +101,14 @@ class Tablero {
           ellipse(i*tamCasilla+(tamCasilla/2), j*tamCasilla+(tamCasilla/2), tamCasilla*3/5, tamCasilla*3/5);
         }
       }
+  }
+  
+  //colorea las fichas
+  void colorea(int posx, int y){
+    for(int x = posx; x>0; x--){
+      if(mundo[x][y] != 0)
+      setFicha(x, y, this.turno);
+    }
   }
 
   /**

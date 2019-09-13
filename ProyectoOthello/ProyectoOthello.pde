@@ -31,10 +31,14 @@ void draw(){
  * Evento para detectar cuando el usuario da clic
  */
 void mousePressed() {
-  println("\nClic en la casilla " + "[" + mouseX/tablero.tamCasilla + ", " + mouseY/tablero.tamCasilla + "]");
-  if(!tablero.estaOcupado(mouseX/tablero.tamCasilla, mouseY/tablero.tamCasilla)){
-    tablero.setFicha(mouseX/tablero.tamCasilla, mouseY/tablero.tamCasilla);
+  int posx = mouseX/tablero.tamCasilla;
+  int posy =mouseY/tablero.tamCasilla;
+  println("\nClic en la casilla " + "[" + ((posx)+1) + ", " + ((posy)+1) + "]");
+  if(!tablero.estaOcupado(posx, posy)){
+    tablero.setFicha(posx, posy);
     tablero.cambiarTurno();
     println("[Turno #" + tablero.numeroDeTurno + "] "  + (tablero.turno ? "jugó ficha blanca" : "jugó ficha negra") + " (Score: " + int(tablero.cantidadFichas().x) + " - " + int(tablero.cantidadFichas().y) + ")");
   }
+  
+  //tablero.colorea(posx, posy);
 }
