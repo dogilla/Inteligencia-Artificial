@@ -83,36 +83,79 @@ class Tablero:
                     contador.y = contador.y + 1
         return contador
     
+    
+    
     def colorea(self, posx, posy):
-        for i in range (self.dimension):
-            if(self.estaOcupado(posx,i) and self.turno == True):
-                if(self.mundo[posx][i] == 1):
+        ''' Colorea del color del turno las fichas opuestas que esten entre dos fichas del
+        color del turno
+        moverRight - colorea a la derecha
+        moveLeft - colorea a la izquierda
+        '''
+        self.moveRight(posx, posy)
+        self.moveLeft(posx,posy)
+        
+        
+    def moveRight(self,x,y):
+        ''' Se verifica que exita alguna ficha del mismo color hacia la izquiera,
+        si hay un espacio en blanco se detiene. Tambien se detiene al primer encuentro
+        con una ficha del color del turno
+        '''
+        vecino = False
+        c = 2 if self.turno else 1
+        r = 1 if self.turno else 2
+        for i in range(x+1,self.dimension-1):
+            if( not self.estaOcupado(i,y)):
+                break
+            else:
+                if(self.mundo[i][y] == r):
+                    vecino = True
                     break
-                self.mundo[posx][i] = 1
-                self.setFicha(posx,i, True)
-            if(self.estaOcupado(posx,i) and self.turno == False):
-                if(self.mundo[posx][i] == 2):
+        '''
+        si se llegua aqui quiere decir que la ficha
+        tiene otra de su mismo color a la derecha, en ese caso, colorea las que esten
+        en medio, que ya sabemos que son de otro color
+        '''
+        if(vecino):
+            for j in range(x+1,self.dimension-1):
+                if(not self.estaOcupado(j,y)):
                     break
-                self.mundo[posx][i] = 2
-                self.setFicha(posx,i, False)
-        for j in range(self.dimension):
-            if(self.estaOcupado(j,posy) and self.turno == True):
-                if(self.mundo[j][posy] == 1):
+                else:
+                    self.setFicha(j,y,self.turno)
+
+    def moveLeft(self,x,y):
+        vecino = False
+        c = 2 if self.turno else 1
+        r = 1 if self.turno else 2
+        for i in reversed(range(0,x)):
+            if( not self.estaOcupado(i,y)):
+                break
+            else:
+                if(self.mundo[i][y] == r):
+                    vecino = True
                     break
-                self.mundo[j][posy] = 2
-                self.setFicha(j,posy,True)
-            if(self.estaOcupado(j,posy) and self.turno == False):
-                if(self.mundo[posx][i] == 2):
+        '''
+        si se llegua aqui quiere decir que la ficha tiene otra de su mismo color
+        a la izquierda y no hay casillas vacias entre estas
+        '''
+        if(vecino):
+            for j in reversed(range(0,x)):
+                if(not self.estaOcupado(j,y)):
                     break
-                self.mundo[j][posy] = 1
-                self.setFicha(j,posy,False)
+                else:
+                    self.setFicha(j,y,self.turno)
+                
+            
 
     """
-    Nos dice si dadas dos cordenadas tiene una ficha adyacente
-    del color opuesto 
+    Nos dice si dadas dos cordenadas una ficha tiene otra ficha adyacente
+    del color opuesto. Hay que revizar muchos casos pues python se puede
+    salir del arreglo
     """
     def adyacente(self, x, y):
         c = 2 if self.turno else 1
+        """
+        Primero reviza si la ficha esta a la orilla en la izquierda
+        """
         if(x == 0):
             right = self.mundo[x+1][y]
             if(y == 0):
@@ -137,6 +180,9 @@ class Tablero:
             return self.mundo[x+1][y] == c or self.mundo[x-1][y] == c or self.mundo[x][y+1] == c or self.mundo[x][y-1] == c or self.mundo[x-1][y-1] == c or self.mundo[x+1][y-1] == c or self.mundo[x-1][y+1] == c or self.mundo[x+1][y+1] == c    
 
     
+    '''
+    imprime el tablero logico
+    '''
     def imprimeTablero(self):
         print('\n'.join(''.join(str(i)) for i in self.mundo))
             
