@@ -28,5 +28,4 @@ def mousePressed():
             tablero.setFicha(clickX, clickY)
             tablero.cambiarTurno()
             print '[Turno # {!s}] {} (Score {!s} - {!s})'.format(tablero.numeroDeTurno, 'jugo ficha blanca' if tablero.turno else 'jugo ficha negra', int(tablero.cantidadFichas().x), int(tablero.cantidadFichas().y))
-    tablero.imprimeTablero()
     

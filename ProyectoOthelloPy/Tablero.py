@@ -110,15 +110,32 @@ class Tablero:
     """
     Nos dice si dadas dos cordenadas tiene una ficha adyacente
     del color opuesto 
-    """     
-    def adyacente(self, posx, posy):
-        if (self.turno == True):
-            if(self.mundo[posx-1][posy] == 2 or self.mundo[posx+1][posy] == 2 or self.mundo[posx][posy-1] == 2 or self.mundo[posx][posy-1] == 2):
-                return True
+    """
+    def adyacente(self, x, y):
+        c = 2 if self.turno else 1
+        if(x == 0):
+            right = self.mundo[x+1][y]
+            if(y == 0):
+                return right == c or self.mundo[x][y+1] == c or self.mundo[x+1][y+1] == c
+            elif(y == 7):
+                return right == c or self.mundo[x][y-1] == c or self.mundo[x+1][y-1] == c
+            else:
+                return right == c or self.mundo[x][y-1] == c or self.mundo[x][y+1] == c or self.mundo[x+1][y-1] == c or self.mundo[x+1][y+1] == c
+        elif(x == 7):
+            left = self.mundo[x-1][y]            
+            if(y == 0):
+                return left == c or self.mundo[x][y+1] == c or self.mundo[x-1][y+1] == c
+            if(y == 7):
+                return self.mundo[x][y-1] == c or left == c or self.mundo[x-1][y-1] == c    
+            else:
+                return self.mundo[x][y+1] == c or self.mundo[x-1][y+1] == c or left == c or self.mundo[x-1][y-1] == c or self.mundo[x][y-1] == c
+        elif(y == 0):
+            return self.mundo[x-1][y] == c or self.mundo[x-1][y+1] == c or self.mundo[x][y+1] == c or self.mundo[x+1][y+1] == c or self.mundo[x+1][y] == c
+        elif(y == 7):
+            return self.mundo[x-1][y]  == c or self.mundo[x+1][y] == c or self.mundo[x-1][y-1] == c or self.mundo[x][y-1] == c or self.mundo[x+1][y-1] == c
         else:
-            if(self.mundo[posx-1][posy] == 1 or self.mundo[posx+1][posy] == 1 or self.mundo[posx][posy-1] == 1 or self.mundo[posx][posy-1] == 1):
-                return True
-        return False
+            return self.mundo[x+1][y] == c or self.mundo[x-1][y] == c or self.mundo[x][y+1] == c or self.mundo[x][y-1] == c or self.mundo[x-1][y-1] == c or self.mundo[x+1][y-1] == c or self.mundo[x-1][y+1] == c or self.mundo[x+1][y+1] == c    
+
     
     def imprimeTablero(self):
         print('\n'.join(''.join(str(i)) for i in self.mundo))
