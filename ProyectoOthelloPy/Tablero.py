@@ -93,7 +93,30 @@ class Tablero:
         '''
         self.moveRight(posx, posy)
         self.moveLeft(posx,posy)
-        
+        """
+        self.moveUp(posx, posy)
+        self.moveDown(posx, posy)
+        self.DiagonalIA(posx, posy)
+        """
+    
+    def moveUp(self,x,y):
+        vecino = False
+        c = 2 if self.turno else 1
+        r = 1 if self.turno else 2
+        for i in reversed(range(0,y)):
+            if(not self.estaOcupado(x,i)):
+                break
+            else:
+                if(self.mundo[x][i] == r):
+                    vecino = True
+                    break
+        if(vecino):
+            for j in reversed(range(0,y)):
+                if(not self.estaOcupado(x,j)):
+                    break
+                else:
+                    self.setFicha(x,j,self.turno)
+
         
     def moveRight(self,x,y):
         ''' Se verifica que exita alguna ficha del mismo color hacia la izquiera,
@@ -101,9 +124,9 @@ class Tablero:
         con una ficha del color del turno
         '''
         vecino = False
-        c = 2 if self.turno else 1
         r = 1 if self.turno else 2
-        for i in range(x+1,self.dimension-1):
+        l = range(x+1,self.dimension-1)
+        for i in l:
             if( not self.estaOcupado(i,y)):
                 break
             else:
@@ -116,17 +139,19 @@ class Tablero:
         en medio, que ya sabemos que son de otro color
         '''
         if(vecino):
-            for j in range(x+1,self.dimension-1):
+            for j in l:
                 if(not self.estaOcupado(j,y)):
+                    break
+                elif(self.mundo[j][y] == r):
                     break
                 else:
                     self.setFicha(j,y,self.turno)
 
     def moveLeft(self,x,y):
         vecino = False
-        c = 2 if self.turno else 1
         r = 1 if self.turno else 2
-        for i in reversed(range(0,x)):
+        l = reversed(range(0,x-1))
+        for i in l:
             if( not self.estaOcupado(i,y)):
                 break
             else:
@@ -138,14 +163,95 @@ class Tablero:
         a la izquierda y no hay casillas vacias entre estas
         '''
         if(vecino):
-            for j in reversed(range(0,x)):
+            for j in l:
                 if(not self.estaOcupado(j,y)):
+                    break
+                elif(self.mundo[j][y] == r):
                     break
                 else:
                     self.setFicha(j,y,self.turno)
-                
-            
 
+    def moveDown(self,x,y):
+        vecino = False
+        r = 1 if self.turno else 2
+        for i in range(y+1, self.dimension-1):
+            if(not self.estaOcupado(x,i)):
+                break
+            else:
+                if(self.mundo[x][i] == r):
+                    vecino = True
+                    break
+        '''
+        si se llegua aqui quiere decir que la ficha tiene otra de su mismo color
+        a la izquierda y no hay casillas vacias entre estas
+        '''
+        if(vecino):
+            for j in range(y+1, self.dimension-1):
+                if(not self.estaOcupado(x,j)):
+                    break
+                else:
+                    self.setFicha(x,j,self.turno)
+                    
+    def DiagonalIA(self, x, y):
+        vecino = False
+        r = 1 if self.turno else 2
+        j = y
+        for i in reversed(range(0,x+1)):
+            if (not self.estaOcupado(i,j)):
+                break;
+            else:
+                if(self.mundo[i][j] == r):
+                    vecino = True
+                    break
+            j = j-1             
+
+        if(vecino):
+            w = j
+            for k in reversed(range(0,x)):
+                if (not self.estaOcupado(k,w)):
+                    break
+                else:
+                    self.setFicha(k,w, self.turno)
+            w = w-1
+            
+                    
+    
+            
+    """              
+    def hasVecino(self, x, y, direction):
+        vecino = False
+        r = 1 if self.turno else 2
+        if (direction == "r"):
+            l = range(x+1,self.dimension-1)
+        if (direction == "l"):
+            l = reversed(range(0,x-1))
+        if (direction == "u"):
+            l = reversed(range(0,y))
+        if (direction == "d"):
+            l = range(y+1, self.dimension)
+        if (direction == "ru"):
+            l = range(x+1,self.dimension-1)
+            l2 = l = reversed(range(0,y))
+        if (direction == "rd"):
+            l = range(x+1,self.dimension-1)
+            l2 = range(y+1, self.dimension)
+        if (direction == "lu"):
+            l = reversed(range(0,x-1))
+            l2 = reversed(range(0,y))
+        if (direction == "ld"):
+            l = reversed(range(0,x-1))
+            l = range(y+1, self.dimension)
+                
+        for i in l:
+            if(not self.estaOcupado(i,y)):
+                break
+            else:
+                if(self.mundo[i][y] == r):
+                    vecino = True
+                    break
+                
+    """
+    
     """
     Nos dice si dadas dos cordenadas una ficha tiene otra ficha adyacente
     del color opuesto. Hay que revizar muchos casos pues python se puede

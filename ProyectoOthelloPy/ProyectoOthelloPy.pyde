@@ -2,7 +2,10 @@
 :author: Rodrigo Colin
 '''
 from Tablero import *
+from Algoritmo import *
+
 tablero = Tablero()
+algoritmo = Algoritmo()
 
 def settings():
     ''' Metodo para establecer tamano de ventana al incluir variables '''
