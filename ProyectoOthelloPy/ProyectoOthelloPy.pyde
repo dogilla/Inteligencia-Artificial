@@ -24,8 +24,7 @@ def mousePressed():
     clickY = mouseY/tablero.tamCasilla
     ''' Evento para detectar cuando el usuario da clic '''
     println("\nClic en la casilla " + "[" + str(clickX) + ", " + str(clickY) + "]")
-    println(str(tablero.adyacente(clickX, clickY)))
-    if tablero.adyacente(clickX, clickY):
+    if tablero.adyacente(clickX, clickY) and tablero.hayColoreables(clickX,clickY):
         tablero.colorea(clickX, clickY)
         if not tablero.estaOcupado(clickX, clickY):
             tablero.setFicha(clickX, clickY)

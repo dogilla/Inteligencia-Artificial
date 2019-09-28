@@ -10,11 +10,21 @@ class Algoritmo:
     def setTree(self, arbol):
         self.tree = arbol
     
-    """
-    def creaTree(self, depth):
-        while((len(list) % 2) != 0)
+    #Funcion heuristica con estrategia de fichas
+    def h1(self, tablero):
+        #puntuacion final
+        pFinal = tablero.cantidadFichas().x - tablero.cantidadFichas().y
+        if(pFinal > 0):
+            return 10*pFinal
+        else:
+            return -10*pFinal
+    
     """    
-        
+    crea un arbol de juego segun una jugada
+    def ArbolJuego(self,tablero):
+    tablero.getMundo()
+    """ 
+            
         
     #Toma un tablero logico y devuelve una instancia nueva con los mismo valores    
     def copiaTablero(tablero):

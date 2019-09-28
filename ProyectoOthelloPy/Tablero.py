@@ -40,6 +40,9 @@ class Tablero:
                     noStroke() # quitar contorno de linea
                     ellipse(i*self.tamCasilla+(self.tamCasilla/2), j*self.tamCasilla+(self.tamCasilla/2), self.tamCasilla*3/5, self.tamCasilla*3/5)
     
+    def getMundo(self):
+        return self.mundo
+    
     def setFicha(self, posX, posY, turno=None):
         ''' Coloca o establece una ficha en una casilla especifica del tablero.
         Nota: El eje vertical esta invertido y el contador empieza en cero.
@@ -82,175 +85,25 @@ class Tablero:
                 if self.mundo[i][j] == 2:
                     contador.y = contador.y + 1
         return contador
-    
-    
-    
+
+        
     def colorea(self, posx, posy):
         ''' Colorea del color del turno las fichas opuestas que esten entre dos fichas del
         color del turno
-        moverRight - colorea a la derecha
-        moveLeft - colorea a la izquierda
         '''
-        self.moveRight(posx, posy)
-        self.moveLeft(posx,posy)
-        """
-        self.moveUp(posx, posy)
-        self.moveDown(posx, posy)
-        self.DiagonalIA(posx, posy)
-        """
-    
-    def moveUp(self,x,y):
-        vecino = False
-        c = 2 if self.turno else 1
-        r = 1 if self.turno else 2
-        for i in reversed(range(0,y)):
-            if(not self.estaOcupado(x,i)):
-                break
-            else:
-                if(self.mundo[x][i] == r):
-                    vecino = True
-                    break
-        if(vecino):
-            for j in reversed(range(0,y)):
-                if(not self.estaOcupado(x,j)):
-                    break
-                else:
-                    self.setFicha(x,j,self.turno)
-
+        pj = self.propaga(posx,posy)
+        for i,j in pj:
+            self.setFicha(i,j,self.turno)
+        self.jugadasPosibles(posx,posy)
         
-    def moveRight(self,x,y):
-        ''' Se verifica que exita alguna ficha del mismo color hacia la izquiera,
-        si hay un espacio en blanco se detiene. Tambien se detiene al primer encuentro
-        con una ficha del color del turno
-        '''
-        vecino = False
-        r = 1 if self.turno else 2
-        l = range(x+1,self.dimension-1)
-        for i in l:
-            if( not self.estaOcupado(i,y)):
-                break
-            else:
-                if(self.mundo[i][y] == r):
-                    vecino = True
-                    break
-        '''
-        si se llegua aqui quiere decir que la ficha
-        tiene otra de su mismo color a la derecha, en ese caso, colorea las que esten
-        en medio, que ya sabemos que son de otro color
-        '''
-        if(vecino):
-            for j in l:
-                if(not self.estaOcupado(j,y)):
-                    break
-                elif(self.mundo[j][y] == r):
-                    break
-                else:
-                    self.setFicha(j,y,self.turno)
-
-    def moveLeft(self,x,y):
-        vecino = False
-        r = 1 if self.turno else 2
-        l = reversed(range(0,x-1))
-        for i in l:
-            if( not self.estaOcupado(i,y)):
-                break
-            else:
-                if(self.mundo[i][y] == r):
-                    vecino = True
-                    break
-        '''
-        si se llegua aqui quiere decir que la ficha tiene otra de su mismo color
-        a la izquierda y no hay casillas vacias entre estas
-        '''
-        if(vecino):
-            for j in l:
-                if(not self.estaOcupado(j,y)):
-                    break
-                elif(self.mundo[j][y] == r):
-                    break
-                else:
-                    self.setFicha(j,y,self.turno)
-
-    def moveDown(self,x,y):
-        vecino = False
-        r = 1 if self.turno else 2
-        for i in range(y+1, self.dimension-1):
-            if(not self.estaOcupado(x,i)):
-                break
-            else:
-                if(self.mundo[x][i] == r):
-                    vecino = True
-                    break
-        '''
-        si se llegua aqui quiere decir que la ficha tiene otra de su mismo color
-        a la izquierda y no hay casillas vacias entre estas
-        '''
-        if(vecino):
-            for j in range(y+1, self.dimension-1):
-                if(not self.estaOcupado(x,j)):
-                    break
-                else:
-                    self.setFicha(x,j,self.turno)
-                    
-    def DiagonalIA(self, x, y):
-        vecino = False
-        r = 1 if self.turno else 2
-        j = y
-        for i in reversed(range(0,x+1)):
-            if (not self.estaOcupado(i,j)):
-                break;
-            else:
-                if(self.mundo[i][j] == r):
-                    vecino = True
-                    break
-            j = j-1             
-
-        if(vecino):
-            w = j
-            for k in reversed(range(0,x)):
-                if (not self.estaOcupado(k,w)):
-                    break
-                else:
-                    self.setFicha(k,w, self.turno)
-            w = w-1
-            
-                    
-    
-            
-    """              
-    def hasVecino(self, x, y, direction):
-        vecino = False
-        r = 1 if self.turno else 2
-        if (direction == "r"):
-            l = range(x+1,self.dimension-1)
-        if (direction == "l"):
-            l = reversed(range(0,x-1))
-        if (direction == "u"):
-            l = reversed(range(0,y))
-        if (direction == "d"):
-            l = range(y+1, self.dimension)
-        if (direction == "ru"):
-            l = range(x+1,self.dimension-1)
-            l2 = l = reversed(range(0,y))
-        if (direction == "rd"):
-            l = range(x+1,self.dimension-1)
-            l2 = range(y+1, self.dimension)
-        if (direction == "lu"):
-            l = reversed(range(0,x-1))
-            l2 = reversed(range(0,y))
-        if (direction == "ld"):
-            l = reversed(range(0,x-1))
-            l = range(y+1, self.dimension)
-                
-        for i in l:
-            if(not self.estaOcupado(i,y)):
-                break
-            else:
-                if(self.mundo[i][y] == r):
-                    vecino = True
-                    break
-                
     """
+    nos dice si dadas dos coordenas hay fichas de otro color entre las coordenas
+    y otra de nuestro color
+    """
+    def hayColoreables(self, posx,posy):
+        return len(self.propaga(posx,posy)) > 0 
+    
+
     
     """
     Nos dice si dadas dos cordenadas una ficha tiene otra ficha adyacente
@@ -291,9 +144,62 @@ class Tablero:
     '''
     def imprimeTablero(self):
         print('\n'.join(''.join(str(i)) for i in self.mundo))
-            
+    
+    #Nos dice si dos puntos estan en el limite del mundo
+    def limite(self, x, y):
+        return x >= 0 and x <= 7 and y >= 0 and y <=7
+    
+    """
+    dado una coordenada x y el algoritmo se propaga a todos lados, si encuentra
+    una del mismo color del turno se regresa guardando las fichas en una lista
+    """    
+    def propaga(self, mousex, mousey):
+        #turno contrario
+        c = 2 if self.turno else 1
+        #turno correcto
+        r = 1 if self.turno else 2
         
-            
-            
+        #lista de fichas que vamos a voltear (cambiar al color opuesto)
+        volteadas = []
+        for i, j in [[0,1],[1,1],[1, 0],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1]]:
+            x,y = mousex , mousey
+            x+=i
+            y+=j
+            if self.limite(x,y) and self.mundo[x][y] == c:
+                x = x+i
+                y = y+j
+                if not self.limite(x,y):
+                    continue
+                while self.mundo[x][y] == c:
+                    x+=i
+                    x+=j
+                    if not self.limite(x,y):
+                        break
+                if not self.limite(x,y):
+                    continue
+                if self.mundo[x][y] == r:
+                    while True:
+                        x-=i
+                        y-=j
+                        if x == mousex and y == mousey:
+                            break
+                        volteadas.append([x,y])
+        return volteadas
+    
+    def setPunto(self, i, j):
+        fill(jugador1 if self.turno else jugador2) # establecer el color de la ficha
+        noStroke() # quitar contorno de linea
+        ellipse(i*self.tamCasilla+(self.tamCasilla/2), j*self.tamCasilla+(self.tamCasilla/2), self.tamCasilla*1/5, self.tamCasilla*1/5)
+        
+    
+    def jugadasPosibles(self, posx, posy):
+        for x,y in self.propaga(posx, posy):
+            for i,j in [[0,1],[1,1],[1, 0],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1]]:
+                if(limite(x+i,y+j)):
+                    setPunto(x+i, y+i)
+                    
+                
+    """    
+        
         
          
