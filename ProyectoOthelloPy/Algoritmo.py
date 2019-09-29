@@ -13,11 +13,11 @@ class Algoritmo:
     #Funcion heuristica con estrategia de fichas
     def h1(self, tablero):
         #puntuacion final
-        pFinal = tablero.cantidadFichas().x - tablero.cantidadFichas().y
+        pFinal = int(tablero.cantidadFichas().x) - int(tablero.cantidadFichas().y)
         if(pFinal > 0):
-            return 10*pFinal
+            return 100*pFinal
         else:
-            return -10*pFinal
+            return -100*pFinal
     
     """    
     crea un arbol de juego segun una jugada
