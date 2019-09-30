@@ -9,6 +9,7 @@ class Tablero:
         '''
         #dificultad del juego 3 para facil y 5 pa dificil
         self.dificultad = 3 #facil por default
+        self.nivel = 0
         self.dimension = dimension
         self.tamCasilla = tamCasilla
         self.turno = True  #Representa de quien es el turno bajo la siguiente convencion: true = jugador 1, false = jugador 2
@@ -52,6 +53,10 @@ class Tablero:
             self.dificultad = 5
         else:
             self.dificultad = 3
+    
+    #aumenta de nivel el tablero para el arbol de juego
+    def nivelUp(self):
+        self.nivel = self.nivel+1
     
     def getMundo(self):
         return self.mundo
@@ -206,8 +211,7 @@ class Tablero:
         for i in range(self.dimension):
             for j in range(self.dimension):
                 if self.hayColoreables(i, j) and self.adyacente(i,j):
-                    jugadas.append([i,j])    
-        print(str(jugadas))    
+                    jugadas.append([i,j])        
         
     """    
     funcion que hace jugar a la inteligencia artificial, pone una ficha en la

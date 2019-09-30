@@ -1,5 +1,9 @@
 ''' Proyecto base para el juego de Othello/Reversi 
-:author: Rodrigo Colin
+:authores: 
+Rodrigo Colin (tablero)
+Mario Guzman Mosco
+Miguel Angel M Mendoza
+Miriam Torres Bucio
 '''
 from Tablero import *
 from Algoritmo import *
