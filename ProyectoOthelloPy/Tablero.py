@@ -21,6 +21,7 @@ class Tablero:
         self.mundo[(self.dimension/2)-1][(self.dimension/2)-1] = 2
         self.mundo[self.dimension/2][self.dimension/2] = 2
         
+        
     def display(self):
         ''' Dibuja en pantalla el tablero, es decir, dibuja las casillas y las fichas de los jugadores '''
         fondo = color(63, 221, 24) # El color del fondo del tablero
@@ -42,6 +43,11 @@ class Tablero:
                     fill(jugador1 if self.mundo[i][j] == 1 else jugador2) # establecer el color de la ficha
                     noStroke() # quitar contorno de linea
                     ellipse(i*self.tamCasilla+(self.tamCasilla/2), j*self.tamCasilla+(self.tamCasilla/2), self.tamCasilla*3/5, self.tamCasilla*3/5)
+        posiblePlays = self.jugadasPosibles()
+        for x,y in posiblePlays:
+            ellipse(x*self.tamCasilla+(self.tamCasilla/2), y*self.tamCasilla+(self.tamCasilla/2), self.tamCasilla*1/5, self.tamCasilla*1/5)
+            
+            
 
     #establece la dificultad del juego
     def setDificultad(self, dificil):
@@ -60,6 +66,9 @@ class Tablero:
     
     def getMundo(self):
         return self.mundo
+    
+    def setMundo(self, world):
+        self.mundo = world
     
     def setFicha(self, posX, posY, turno=None):
         ''' Coloca o establece una ficha en una casilla especifica del tablero.
@@ -120,7 +129,7 @@ class Tablero:
     y otra de nuestro color
     """
     def hayColoreables(self, posx,posy):
-        return len(self.propaga(posx,posy)) > 0 
+        return len(self.propaga(posx,posy)) > 0
     
 
     
@@ -173,11 +182,14 @@ class Tablero:
     una del mismo color del turno se regresa guardando las fichas en una lista
     """    
     def propaga(self, mousex, mousey):
+        if(self.mundo[mousex][mousey] != 0):
+            return []
         #turno contrario
         c = 2 if self.turno else 1
         #turno correcto
         r = 1 if self.turno else 2
-        
+        #marca temporal
+        self.mundo[mousex][mousey] = r
         #lista de fichas que vamos a voltear (cambiar al color opuesto)
         volteadas = []
         for i, j in [[0,1],[1,1],[1, 0],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1]]:
@@ -191,40 +203,48 @@ class Tablero:
                     continue
                 while self.mundo[x][y] == c:
                     x+=i
-                    x+=j
+                    y+=j
                     if not self.limite(x,y):
                         break
                 if not self.limite(x,y):
                     continue
                 if self.mundo[x][y] == r:
                     while True:
-                        x-=i
-                        y-=j
+                        x=x-i
+                        y=y-j
                         if x == mousex and y == mousey:
                             break
                         volteadas.append([x,y])
+        self.mundo[mousex][mousey] = 0
         return volteadas
     
     #regresa una lista con las posibles jugadas del jugador
     def jugadasPosibles(self):
+        print("jugadas posibles")
         jugadas = []
-        for i in range(self.dimension):
-            for j in range(self.dimension):
-                if self.hayColoreables(i, j) and self.adyacente(i,j):
-                    jugadas.append([i,j])        
+        for x in range(8):
+            for y in range(8):
+                if (self.adyacente(x,y) and self.hayColoreables(x,y)):
+                    jugadas.append([x,y])
+        return jugadas
         
     """    
     funcion que hace jugar a la inteligencia artificial, pone una ficha en la
     posicion (x,y) y cambia el turno      
     """
-    def juegaIA(self, x, y):
-        self.setFicha(x,y)
+    def juegaIA(self, t):
+        self.colorea(t[0],t[1])
+        self.setFicha(t[0],t[1])
+        
         #turno del contrario
-        self.mundo[x][y] = 1 if self.turno else 2
+        self.mundo[t[0]][t[1]] = 1 if self.turno else 2
         self.cambiarTurno()
         print '[Turno # {!s}] {} (Score {!s} - {!s})'.format(self.numeroDeTurno, 'jugo ficha blanca' if self.turno else 'jugo ficha negra', int(self.cantidadFichas().x), int(self.cantidadFichas().y))
         
-          
-        
+    def turnoIA(self,jugada):
+        for i in range(8):
+            for j in range(8):
+                if self.mundo[i][j] != jugada.mundo[i][j]:
+                    return (i,j)
         
          

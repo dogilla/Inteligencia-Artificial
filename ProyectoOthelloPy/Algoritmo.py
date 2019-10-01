@@ -26,76 +26,37 @@ class Algoritmo:
         else:
             return -10*pFinal
     
-    """    
-    crea un arbol de juego segun una jugada
-    def ArbolJuego(self,tablero, x, y):
-        arbol = []
-        tree = [[[5, 1, 2], [8, -8, -9]], [[9, 4, 5], [-3, 4, 3]]]
-        jugadas = tablero.jugadasPosibles()
-        if (len(jugadas) == 0):
-            return
-        elif(len(jugadas % 2) == 0):
-        
-        else:
-    """
-    
     #crea un nivel extra en el arbol de juego
-    def creaNivel(tablero):
+    def creaNivel(self, tablero):
+        print("crea nivel")
         jugadas = tablero.jugadasPosibles()
         nivel = []
         for jugada in jugadas:
-            tablero_n = copiaTablero(tablero)
-            tablero_n.setFicha(jugada.get(0), jugada.get(1))
-            tablero_n.nivelUp()
+            tablero_n = self.copiaTablero(tablero)
+            tablero_n.setFicha(jugada[0], jugada[1])
             nivel.append(tablero_n)
         return nivel
     
-    def creaArreglo(self, num, arreglo):
-        while(num>0):
-            arreglo.append([])
-            num = num-1 
-            
-        
-    def CreaArbol(tablero):
-        i = tablero.getDificultad()
-        n = 0
-        arbolJuego = self.creaNivel(tablero)
-        nthnivel = []
-        while (i > 0):
-            for j in range(len(arbolJuego)):
-                n_jugadas = self.creaNivel(arbolJuego[j])
-                nthnivel.append(n_jugadas)
-                arbolJuego = []
-            i=i-1
-    
-    """
-    r = [tablero]
-    for i in r:
-        if type(r) = tablero then...
-    """    
-    def creaArbolFacil(tablero):
+    #regresa la jugada de la IA segun la heuristica y el algoritmo alfa-beta    
+    def creaArbolFacil(self, tablero):
         nivel = self.creaNivel(tablero)
         heuristicas = []
         for jugada in nivel:
             heuristicas.append(self.h1(jugada))
-        result = self.podaalphabeta(heuristicas,1, 0,0)
+        result = self.podaalphabeta(heuristicas,0,-15,15)
         for i in nivel:
             if (self.h1(i) == result):
-                return i
-
-            
-            
-        
-            
-     
-            
+                return i        
         
     #Toma un tablero logico y devuelve una instancia nueva con los mismo valores    
-    def copiaTablero(tablero):
+    def copiaTablero(self, tablero):
         #nuevo tablero
         nt = Tablero()
-        nt.turno , nt.numeroTurno = tablero.turno, tablero.numeroTurno
-        nt.mundo = deepcopy(tablero.mundo)
+        nt.turno , nt.numeroDeTurno = tablero.turno, tablero.numeroDeTurno
+        for i in range(8):
+            for j in range(8):
+                nt.mundo[i][j] = tablero.mundo[i][j]
+        #nt.mundo = deepcopy(tablero.getMundo())
         return nt
         
     #Algitmo MinMax con optimizacion poda alfa-beta    
@@ -103,7 +64,7 @@ class Algoritmo:
         i = 0
         for rama in arbol:
             if type(rama) is list:
-                (nalfa,nbeta) = podaalphabeta(rama, depth+1, alfa, beta)
+                (nalfa,nbeta) = self.podaalphabeta(rama, depth+1, alfa, beta)
                 #usamos modulo para saber si es rama con profundidad par o impar
                 if depth % 2 == 1:
                     beta = nalfa if nalfa < beta else beta
@@ -120,7 +81,4 @@ class Algoritmo:
                     break
         if depth == self.raiz:
             arbol = alfa if self.raiz == 0 else beta
-            self.setTree(arbol)
-        return (alfa, beta)
-                    
-        
+        return arbol    
