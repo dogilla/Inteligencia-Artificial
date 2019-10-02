@@ -1,4 +1,6 @@
-''' Algoritmos para el juego de Othello/Reversi 
+''' 
+Algoritmos necesarios para la implementacion del juego de Othello/Reversi
+Estos algoritmos son implementados para ser usados sobre la representacion del tablero
 :authores: 
 Mario Guzman Mosco
 Miguel Angel M Mendoza
@@ -6,18 +8,19 @@ Miriam Torres Bucio
 '''
 
 from Tablero import *
-from copy import deepcopy
 
 class Algoritmo:
     def __init__(self):
+        self.dificultad = 1
         self.tree = []
+        #raiz del arbol de juego
         self.raiz = 0
         self.alfabeta = (0,0)
         
     def setTree(self, arbol):
         self.tree = arbol
     
-    #Funcion heuristica con estrategia de fichas
+    #Funcion heuristica con estrategia de maximizacion de fichas
     def h1(self, tablero):
         #puntuacion final
         pFinal = int(tablero.cantidadFichas().y) - int(tablero.cantidadFichas().x)
@@ -25,10 +28,19 @@ class Algoritmo:
             return 10*pFinal
         else:
             return -10*pFinal
+        
+    #selecciona la dificultad del juego                
+    def selectDificulty(self,y):
+        if y >= 240:
+            self.dificultad = 1
+            print("MODO FACIL")
+        else:
+            self.dificultad = 2
+            print("MODO DIFICIL")
+        
     
     #crea un nivel extra en el arbol de juego
     def creaNivel(self, tablero):
-        print("crea nivel")
         jugadas = tablero.jugadasPosibles()
         nivel = []
         for jugada in jugadas:
@@ -37,18 +49,24 @@ class Algoritmo:
             nivel.append(tablero_n)
         return nivel
     
-    #regresa la jugada de la IA segun la heuristica y el algoritmo alfa-beta    
-    def creaArbolFacil(self, tablero):
+    """
+    Recibe el tablero del juego y regresa la jugada que va a hacer IA 
+    segun la funcion heuristica y el algoritmo poda alfa-beta 
+    """   
+    def creaArbol(self, tablero):
         nivel = self.creaNivel(tablero)
+        #lista con los valores heuristicos de las posibles jugadas
         heuristicas = []
         for jugada in nivel:
+            #uso de la heuristica en las posibles jugadas
             heuristicas.append(self.h1(jugada))
         result = self.podaalphabeta(heuristicas,0,-15,15)
         for i in nivel:
             if (self.h1(i) == result):
-                return i        
+                return i
+            
         
-    #Toma un tablero logico y devuelve una instancia nueva con los mismo valores    
+    #Toma un tablero y devuelve una instancia nueva con los mismos valores    
     def copiaTablero(self, tablero):
         #nuevo tablero
         nt = Tablero()
@@ -56,10 +74,9 @@ class Algoritmo:
         for i in range(8):
             for j in range(8):
                 nt.mundo[i][j] = tablero.mundo[i][j]
-        #nt.mundo = deepcopy(tablero.getMundo())
         return nt
         
-    #Algitmo MinMax con optimizacion poda alfa-beta    
+    #Algitmo MiniMax con optimizacion poda alfa-beta    
     def podaalphabeta(self, arbol, depth, alfa, beta):
         i = 0
         for rama in arbol:
@@ -72,6 +89,7 @@ class Algoritmo:
                     alfa = nbeta if nbeta > alfa else alfa
                 rama[i] = alfa if depth % 2 == 0 else beta
                 i = i+1
+            #sabemos que un nodo es una hoja si en un valor y no una lista
             else:
                 if depth % 2 == 0 and alfa < rama:
                     alfa = rama
@@ -81,4 +99,8 @@ class Algoritmo:
                     break
         if depth == self.raiz:
             arbol = alfa if self.raiz == 0 else beta
+        """
+        Al final regresa el mejor valor heuristico, si no ha acabado la recursion 
+        entoces regresa un arbol de juego y continua el algoritmo
+        """
         return arbol    

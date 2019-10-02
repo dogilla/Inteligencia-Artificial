@@ -7,8 +7,6 @@ class Tablero:
         :param tamCasilla: El tamano en pixeles de cada casilla cuadrada del tablero
         :type tamCasilla: int
         '''
-        #dificultad del juego 3 para facil y 5 pa dificil
-        self.dificultad = 3 #facil por default
         self.nivel = 0
         self.dimension = dimension
         self.tamCasilla = tamCasilla
@@ -24,7 +22,7 @@ class Tablero:
         
     def display(self):
         ''' Dibuja en pantalla el tablero, es decir, dibuja las casillas y las fichas de los jugadores '''
-        fondo = color(63, 221, 24) # El color del fondo del tablero
+        fondo = color(23,188,107)  # El color del fondo del tablero
         linea = color(0) # El color de linea del tablero
         grosor = 2 # Ancho de linea (en pixeles)
         jugador1 = color(0) # Color de ficha para el primer jugador
@@ -43,22 +41,11 @@ class Tablero:
                     fill(jugador1 if self.mundo[i][j] == 1 else jugador2) # establecer el color de la ficha
                     noStroke() # quitar contorno de linea
                     ellipse(i*self.tamCasilla+(self.tamCasilla/2), j*self.tamCasilla+(self.tamCasilla/2), self.tamCasilla*3/5, self.tamCasilla*3/5)
+        #Esto nos ayuda a dibujar los espacios en donde el jugador puede poner una ficha
         posiblePlays = self.jugadasPosibles()
         for x,y in posiblePlays:
             ellipse(x*self.tamCasilla+(self.tamCasilla/2), y*self.tamCasilla+(self.tamCasilla/2), self.tamCasilla*1/5, self.tamCasilla*1/5)
-            
-            
-
-    #establece la dificultad del juego
-    def setDificultad(self, dificil):
-        if dificil == "facil":
-            self.dificultad = 3
-        elif dificil == "media":
-            self.dificultad = 4
-        elif dificil == "dificil":
-            self.dificultad = 5
-        else:
-            self.dificultad = 3
+                
     
     #aumenta de nivel el tablero para el arbol de juego
     def nivelUp(self):
@@ -122,16 +109,12 @@ class Tablero:
         for i,j in pj:
             self.setFicha(i,j,self.turno)
 
-        
-        
     """
     nos dice si dadas dos coordenas hay fichas de otro color entre las coordenas
-    y otra de nuestro color
+    y otra de nuestro color, es decir, hay fichas que pueden ser coloreables al color opuesto
     """
     def hayColoreables(self, posx,posy):
         return len(self.propaga(posx,posy)) > 0
-    
-
     
     """
     Nos dice si dadas dos cordenadas una ficha tiene otra ficha adyacente
@@ -173,7 +156,7 @@ class Tablero:
     def imprimeTablero(self):
         print('\n'.join(''.join(str(i)) for i in self.mundo))
     
-    #Nos dice si dos puntos estan en el limite del mundo
+    #Nos dice si dos puntos estan en el limite del tablero
     def limite(self, x, y):
         return x >= 0 and x <= 7 and y >= 0 and y <=7
     
@@ -218,29 +201,57 @@ class Tablero:
         self.mundo[mousex][mousey] = 0
         return volteadas
     
-    #regresa una lista con las posibles jugadas del jugador
+    def juega(self):
+        self.turno = not self.turno
+        for i in range(8):
+            for j in range(8):
+                if self.adyacente(i,j) and self.hayColoreables(i,j):
+                    self.juegaIA((i,j))
+            
+        
+    
+    #regresa una lista con las posibles jugadas del jugador segun las reglas
     def jugadasPosibles(self):
-        print("jugadas posibles")
         jugadas = []
         for x in range(8):
             for y in range(8):
                 if (self.adyacente(x,y) and self.hayColoreables(x,y)):
                     jugadas.append([x,y])
         return jugadas
-        
+    
+    def noHayJugadas(self):
+        return (len(self.jugadasPosibles())) == 0
+    
+    def ganador(self):
+        n = self.cantidadFichas().x
+        b = self.cantidadFichas().y
+        if n > b:
+            print("GANO NEGRO")
+        elif b > n:
+            print("GANO BLANCO")
+        else:
+            print("EMPATE")
+            
+    #nos dice si hay ganador
+    def hayGanador(self):
+        fn = self.cantidadFichas().x + self.cantidadFichas().y
+        return (fn == 63) or (fn == 64)
+                
     """    
-    funcion que hace jugar a la inteligencia artificial, pone una ficha en la
-    posicion (x,y) y cambia el turno      
+    Funcion que muestra visualmente la jugada de la inteligencia artificial, pone una ficha en la
+    posicion (x,y) y cambia el turno. Recibe una tupla con las coordenadas de donde poner la ficha
     """
     def juegaIA(self, t):
         self.colorea(t[0],t[1])
         self.setFicha(t[0],t[1])
-        
         #turno del contrario
         self.mundo[t[0]][t[1]] = 1 if self.turno else 2
         self.cambiarTurno()
         print '[Turno # {!s}] {} (Score {!s} - {!s})'.format(self.numeroDeTurno, 'jugo ficha blanca' if self.turno else 'jugo ficha negra', int(self.cantidadFichas().x), int(self.cantidadFichas().y))
-        
+        if(self.noHayJugadas()):
+            self.juega()
+            
+    #regresa las coordenadas de la ficha que va a juegar la IA.
     def turnoIA(self,jugada):
         for i in range(8):
             for j in range(8):
