@@ -49,11 +49,16 @@ class DecisionTree(object):
         self.xy = head
 
     def question(self, head, snack, filter_list=[]):
-        vertical = lambda  a: True if a == (1,0) else False 
-        horizontal = lambda a,b: (0,-1) if a<= b else (0,1)
         if len(filter_list) == 0:
-            return self.question(head, snack, filter(vertical(head,snack),self.options))
-        
+            if head[0] <= snack[0]:
+                return self.question(head, snack, [x for x in self.options if x not in [(1,0)]])
+            else:
+                return self.question(head, snack, [x for x in self.options if x not in [(-1,0)]])
+        else:
+            if head[1] <= snack[0]:
+                return [x for x in self.options if x not in [(1,0)]]
+            else:
+                return [x for x in self.options if x not in [(1,0)]]
                 
     def get_result(self):
         return self.xy
