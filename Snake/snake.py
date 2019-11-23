@@ -38,7 +38,7 @@ class Cuadro(object):
             pygame.draw.circle(superficie, (0,0,0), circleMiddle2, radius)
        
  
-class DecisionTree(object):
+class ArbolDecision(object):
     """ clase que representa un arbol de desición """
     etiquetas = {}
 
@@ -237,7 +237,7 @@ def main():
     while flag:
         pygame.time.delay(60)
         clock.tick(8)
-        dt = DecisionTree()
+        dt = ArbolDecision()
         m1,m2 = dt.Pregunta(agente.cuerpo[0].pos, carnada.pos)
         if m1 not in jugadas:
             jugadas.append(m1)
@@ -254,7 +254,7 @@ def main():
         #verifica si el agente ha perdido o sigue en juego
         for x in range(len(agente.cuerpo)):
             if agente.cuerpo[x].pos in list(map(lambda z:z.pos,agente.cuerpo[x+1:])):
-                message_box("Ha perdido", "volvera a juagar")
+                message_box("Ha perdido", "volvera a jugar")
                 agente.reinicio((10,10))
                 break 
         redibuja(fin_juego)
