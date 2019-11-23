@@ -5,17 +5,17 @@ import pygame
 import tkinter as tk
 from tkinter import messagebox
  
-class cube(object):
+class Cuadro(object):
     """ clase que representa un cuadro del tablero de juego"""
-    rows = 20
+    filas = 20
     w = 500
-    def __init__(self,start,dirnx=1,dirny=0,color=(255,0,0)):
-        self.pos = start
+    def __init__(self,inicio,dirnx=1,dirny=0,color=(255,0,0)):
+        self.pos = inicio
         self.dirnx = 1
         self.dirny = 0
         self.color = color
 
-    def print_cube(self):
+    def print_Cuadro(self):
         print("la posicion de la carnada es " + str(self.pos))
   
     def move(self, dirnx, dirny):
@@ -23,155 +23,195 @@ class cube(object):
         self.dirny = dirny
         self.pos = (self.pos[0] + self.dirnx, self.pos[1] + self.dirny)
  
-    def draw(self, surface, eyes=False):
-        dis = self.w // self.rows
+    def draw(self, superficie, ojos=False):
+        distancia = self.w // self.filas
         i = self.pos[0]
         j = self.pos[1]
  
-        pygame.draw.rect(surface, self.color, (i*dis+1,j*dis+1, dis-2, dis-2))
-        if eyes:
-            centre = dis//2
+        pygame.draw.rect(superficie, self.color, (i*distancia+1,j*distancia+1, distancia-2, distancia-2))
+        if ojos:
+            centro = distancia//2
             radius = 3
-            circleMiddle = (i*dis+centre-radius,j*dis+8)
-            circleMiddle2 = (i*dis + dis -radius*2, j*dis+8)
-            pygame.draw.circle(surface, (0,0,0), circleMiddle, radius)
-            pygame.draw.circle(surface, (0,0,0), circleMiddle2, radius)
+            circleMiddle = (i*distancia+centro-radius,j*distancia+8)
+            circleMiddle2 = (i*distancia + distancia -radius*2, j*distancia+8)
+            pygame.draw.circle(superficie, (0,0,0), circleMiddle, radius)
+            pygame.draw.circle(superficie, (0,0,0), circleMiddle2, radius)
        
  
 class DecisionTree(object):
     """ clase que representa un arbol de desición """
-    xy = (0,0)
-    #izquierda, derecha, arriba, abajo
-    options = [(-1,0),(1,0),(0,-1),(0,1)]
-    node = []
+    etiquetas = {}
 
-    def __init__(self, head, snack):
-        self.xy = head
-
-    def question(self, head, snack, filter_list=[]):
+    def __init__(self):
+        self.etiquetas = {
+            "l":(-1,0),
+            "r":(1,0),
+            "u":(0,-1),
+            "d":(0,1),
+        }
+        
+    def Pregunta(self, cabeza, carnada, filter_list=[]):
         if len(filter_list) == 0:
-            if head[0] <= snack[0]:
-                return self.question(head, snack, [x for x in self.options if x not in [(1,0)]])
+            #derecha
+            if carnada[0] < cabeza[0]:
+                self.etiquetas.pop("r")
+                #arriba
+                if carnada[1] < cabeza[1]:
+                    self.etiquetas.pop("d")
+                    return self.Pregunta(cabeza, carnada, self.etiquetas)
+                else:
+                    self.etiquetas.pop("u")
+                    return self.Pregunta(cabeza, carnada, self.etiquetas)
             else:
-                return self.question(head, snack, [x for x in self.options if x not in [(-1,0)]])
+                self.etiquetas.pop("l")
+                if carnada[1] < cabeza[1]:
+                    self.etiquetas.pop("d")
+                    return self.Pregunta(cabeza, carnada, self.etiquetas)
+                else:
+                    self.etiquetas.pop("u")
+                    return self.Pregunta(cabeza, carnada, self.etiquetas)
         else:
-            if head[1] <= snack[0]:
-                return [x for x in self.options if x not in [(1,0)]]
-            else:
-                return [x for x in self.options if x not in [(1,0)]]
-                
-    def get_result(self):
-        return self.xy
+            m1 = self.etiquetas.popitem()[1]
+            m2 = self.etiquetas.popitem()[1]
+            return m1,m2
+            
  
-class snake(object):
-    """ clase que representa a la serpiente del juego """
-    body = []
-    turns = {}
+class Serpiente(object):
+    """ 
+    Clase que representa a la serpiente del juego 
+
+    ...
+
+    atributos
+    ---------
+    cuerpo: List
+        lista que guarda las posiciones del cuerpo de la serpiente
+    giros: Dictionary
+        diccionario que guarda los posibles giros de posición según las reglas del juego
+        e indica si el giro está activo.
+    color: Color
+        color de la serpiente en el juego según codigo RGB
+    cabeza: Cuadro
+        cuadro que guarda la cabeza de la serpiente
+    dirnx: int
+        direccion el la que se mueve la serpiente en el eje x de un plano en dos dimensiones
+        1 indica una dirección positiva y 0 negativa
+    dirny: int
+        direccion el la que se mueve la serpiente en el eje y de un plano en dos dimensiones
+        1 indica una dirección negativa y 0 positiva
+    """
+    cuerpo = []
+    giros = {}
+
     def __init__(self, color, pos):
+        """ constructor de la clase Serpiente """
         self.color = color
-        self.head = cube(pos)
-        self.body.append(self.head)
+        self.cabeza = Cuadro(pos)
+        self.cuerpo.append(self.cabeza)
         self.dirnx = 0
         self.dirny = 1
 
-    def set_movement(self, x, y):
+    def haz_movimiento(self, direction):
         """ mueve la cabeza a una direccion y hace que el resto del cuerpo lo siga"""
         #la cabeza se mueve hacia la direccion señalada por x y
-        self.dirnx = x
-        self.dirny = y
-        self.turns[self.head.pos[:]] = [self.dirnx, self.dirny]
+        self.dirnx = direction[0]
+        self.dirny = direction[1]
+        self.giros[self.cabeza.pos[:]] = [self.dirnx, self.dirny]
         #Esto hace que el resto del cuerpo siga la cabeza
-        for i, c in enumerate(self.body):
+        for i, c in enumerate(self.cuerpo):
             p = c.pos[:]
-            if p in self.turns:
-                turn = self.turns[p]
+            if p in self.giros:
+                turn = self.giros[p]
                 c.move(turn[0],turn[1])
-                if i == len(self.body)-1:
-                    self.turns.pop(p)
+                if i == len(self.cuerpo)-1:
+                    self.giros.pop(p)
             else:
-                if c.dirnx == -1 and c.pos[0] <= 0: c.pos = (c.rows-1, c.pos[1])
-                elif c.dirnx == 1 and c.pos[0] >= c.rows-1: c.pos = (0,c.pos[1])
-                elif c.dirny == 1 and c.pos[1] >= c.rows-1: c.pos = (c.pos[0], 0)
-                elif c.dirny == -1 and c.pos[1] <= 0: c.pos = (c.pos[0],c.rows-1)
+                if c.dirnx == -1 and c.pos[0] <= 0: c.pos = (c.filas-1, c.pos[1])
+                elif c.dirnx == 1 and c.pos[0] >= c.filas-1: c.pos = (0,c.pos[1])
+                elif c.dirny == 1 and c.pos[1] >= c.filas-1: c.pos = (c.pos[0], 0)
+                elif c.dirny == -1 and c.pos[1] <= 0: c.pos = (c.pos[0],c.filas-1)
                 else: c.move(c.dirnx,c.dirny)
-       
  
-    def reset(self, pos):
-        self.head = cube(pos)
-        self.body = []
-        self.body.append(self.head)
-        self.turns = {}
+    def reinicio(self, pos):
+        """ reinicia la posicion inical de la serpiente y su tamaño de 1 cuadro """
+        self.cabeza = Cuadro(pos)
+        self.cuerpo = []
+        self.cuerpo.append(self.cabeza)
+        self.giros = {}
         self.dirnx = 0
         self.dirny = 1
  
  
-    def addCube(self):
-        """ Agrega un cuadro a la serpiente cuando llega al objetivo """
-        tail = self.body[-1]
+    def agrega_cuadro(self):
+        """ Agrega un cuadro a la serpiente cuando llega al objetivo (carnada) """
+        tail = self.cuerpo[-1]
         dx, dy = tail.dirnx, tail.dirny
  
         if dx == 1 and dy == 0:
-            self.body.append(cube((tail.pos[0]-1,tail.pos[1])))
+            self.cuerpo.append(Cuadro((tail.pos[0]-1,tail.pos[1])))
         elif dx == -1 and dy == 0:
-            self.body.append(cube((tail.pos[0]+1,tail.pos[1])))
+            self.cuerpo.append(Cuadro((tail.pos[0]+1,tail.pos[1])))
         elif dx == 0 and dy == 1:
-            self.body.append(cube((tail.pos[0],tail.pos[1]-1)))
+            self.cuerpo.append(Cuadro((tail.pos[0],tail.pos[1]-1)))
         elif dx == 0 and dy == -1:
-            self.body.append(cube((tail.pos[0],tail.pos[1]+1)))
+            self.cuerpo.append(Cuadro((tail.pos[0],tail.pos[1]+1)))
  
-        self.body[-1].dirnx = dx
-        self.body[-1].dirny = dy
+        self.cuerpo[-1].dirnx = dx
+        self.cuerpo[-1].dirny = dy
        
  
-    def draw(self, surface):
-        for i, c in enumerate(self.body):
+    def draw(self, superficie):
+        """ dibuja la serpiente dinamicamente en el tablero """
+        for i, c in enumerate(self.cuerpo):
             if i ==0:
-                c.draw(surface, True)
+                c.draw(superficie, True)
             else:
-                c.draw(surface)
+                c.draw(superficie)
  
  
-def drawGrid(w, rows, surface):
-    sizeBtwn = w // rows
+def cuadricula(w, filas, superficie):
+    """ dibuja la cuadricula del tablero """
+    tamano = w // filas
     x = 0
     y = 0
-    for l in range(rows):
-        x = x + sizeBtwn
-        y = y + sizeBtwn
- 
-        pygame.draw.line(surface, (255,255,255), (x,0),(x,w))
-        pygame.draw.line(surface, (255,255,255), (0,y),(w,y))
+    for l in range(filas):
+        x = x + tamano
+        y = y + tamano
+        #dibuja lineas blancas
+        pygame.draw.line(superficie, (255,255,255), (x,0),(x,w))
+        pygame.draw.line(superficie, (255,255,255), (0,y),(w,y))
        
  
-def redrawWindow(surface):
-    global rows, width, s, snack
-    surface.fill((0,0,0))
-    s.draw(surface)
-    snack.draw(surface)
-    drawGrid(width,rows, surface)
+def redibuja(superficie):
+    """ vuelve a dibujar el tablero al perder """
+    global filas, anchura, agente, carnada
+    superficie.fill((0,0,0))
+    agente.draw(superficie)
+    carnada.draw(superficie)
+    cuadricula(anchura,filas, superficie)
     pygame.display.update()
  
  
-def randomSnack(rows, item):
+def random_carnada(filas, item):
     """Crea de manera aleatoria una carnada para la serpiente del juego"""
-    positions = item.body
+    posiciones = item.cuerpo
     while True:
-        x = random.randrange(rows)
-        y = random.randrange(rows)
-        if len(list(filter(lambda z:z.pos == (x,y), positions))) > 0:
+        x = random.randrange(filas)
+        y = random.randrange(filas)
+        if len(list(filter(lambda z:z.pos == (x,y), posiciones))) > 0:
             continue
         else:
             break
     return (x,y)
  
  
-def message_box(subject, content):
-    root = tk.Tk()
-    root.attributes("-topmost", True)
-    root.withdraw()
-    messagebox.showinfo(subject, content)
+def message_box(asunto, contenido):
+    origen = tk.Tk()
+    origen.attributes("-topmost", True)
+    origen.withdraw()
+    messagebox.showinfo(asunto, contenido)
     try:
-        root.destroy()
+        origen.destroy()
     except:
         pass
  
@@ -179,15 +219,17 @@ def message_box(subject, content):
 def main():
     """ funcion principal que pone en funcion el juego hasta que termine """
     #declaramos las variables globales del juego
-    global width, rows, s, snack
-    width = 500
-    rows = 20
-    win = pygame.display.set_mode((width, width))
-    s = snake((0,255,0), (10,10))
+    global anchura, filas, agente, carnada, jugadas
+    jugadas = []
+    anchura = 500
+    filas = 20
+    fin_juego = pygame.display.set_mode((anchura, anchura))
+
+    agente = Serpiente((0,255,0), (10,10))
     #posicion de la carnada
-    snackpos = randomSnack(rows, s)
-    snack = cube(snackpos, color=(0,255,0))
-    snack.print_cube()
+    carnadapos = random_carnada(filas, agente)
+    carnada = Cuadro(carnadapos, color=(0,255,0))
+    carnada.print_Cuadro()
     flag = True
  
     clock = pygame.time.Clock()
@@ -195,26 +237,30 @@ def main():
     while flag:
         pygame.time.delay(60)
         clock.tick(8)
-        randx = randint(0,1)
-        randy = randint(0,1)
-        s.set_movement(randx, randy)
-        DecisionTree(s.body[0].pos, snack.pos)
+        dt = DecisionTree()
+        m1,m2 = dt.Pregunta(agente.cuerpo[0].pos, carnada.pos)
+        if m1 not in jugadas:
+            jugadas.append(m1)
+        if m2 not in jugadas:
+            jugadas.append(m2)        
+        agente.haz_movimiento(jugadas.pop(0))      
         #si la posicion de la serpiente es igual al de la carnada significa que llego
         # al objetivo por tanto se agrega un cuadro y se crea otra carnada        
-        if s.body[0].pos == snack.pos:
-            s.addCube()
-            snack = cube(randomSnack(rows, s), color=(0,255,0))
-            snack.print_cube()
- 
-        for x in range(len(s.body)):
-            if s.body[x].pos in list(map(lambda z:z.pos,s.body[x+1:])):
-                print('Score: ' , len(s.body))
-                message_box('You Lost! Play again...' )
-                s.reset((10,10))
-                break  
-        redrawWindow(win)    
+        if agente.cuerpo[0].pos == carnada.pos:
+            agente.agrega_cuadro()
+            carnada = Cuadro(random_carnada(filas, agente), color=(0,255,0))
+            carnada.print_Cuadro()  
+        
+        #verifica si el agente ha perdido o sigue en juego
+        for x in range(len(agente.cuerpo)):
+            if agente.cuerpo[x].pos in list(map(lambda z:z.pos,agente.cuerpo[x+1:])):
+                message_box("Ha perdido", "volvera a juagar")
+                agente.reinicio((10,10))
+                break 
+        redibuja(fin_juego)
+    
+
     pass
- 
  
  
 main()
